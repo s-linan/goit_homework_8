@@ -1,36 +1,32 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 def get_birthdays_per_week(users):
     # current_day is data and time in this moment
-    current_day = datetime.now()
+    current_day = date.today()
+    
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     # dict to write birthdays for next week
-    birthdays_next_week = {
-        'Monday': [],
-        'Tuesday': [],
-        'Wednesday': [],
-        'Thursday': [],
-        'Friday': [],
-        'Saturday': [],
-        'Sunday': []
-    }
-    # range for all next week
-    range = current_day.date() + timedelta(weeks=1)
+    birthdays_next_week = {i: [] for i in range(7)}
+    # end_date for all next week
+    end_date = current_day + timedelta(weeks=1)
 
-    for i in users:
-        name = i['name']
-        birthday = i['birthday']
-        birthday = birthday.replace(year=datetime.today().year) # change all birth year to this year
-        birthday_day = birthday.strftime('%A') # the name of the day of the week
+    for user in users:
+        name = user['name']
+        birthday = user['birthday'].replace(year=datetime.today().year) # change all birth year to this year
+        birthday_day = birthday.weekday() # numerical order of the day of the week
+        # if today is Monday, we need to go back 2 days to include birthdays that were on the weekend
+        if current_day.weekday() == 0:
+            current_day = current_day - timedelta(days=2)
         # if the birthday is in the next week from the current day we add it to dict
-        if current_day.date() <= birthday.date() < range:
+        if current_day <= birthday.date() < end_date:
             # if birthday in Saturday or Sunday we move it to Monday
-            if birthday_day in ['Saturday', 'Sunday']:
-                birthday_day = 'Monday'
+            if birthday_day in [5, 6]:
+                birthday_day = 0
             birthdays_next_week[birthday_day].append(name)
     # output our birthday boys and girls
     for day, names in birthdays_next_week.items():
         if names:
-            print(f"{day}: {', '.join(names)}")
+            print(f"{days[day]}: {', '.join(names)}")
 
 # birthday list for example
 users = [
